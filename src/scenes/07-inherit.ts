@@ -124,57 +124,57 @@ const scene: Scene = {
     })
 
     // ================= 5 个目标：判定与继承 =================
-    const header = text(svg, 200, 522, '第一次运行：5 个目标全部判定', { size: FS.label, weight: 700 })
-    const tally = text(svg, 1720, 522, '5 个目标 · 5 次验证会话', { size: FS.small, fill: C.accent, anchor: 'end' })
+    const header = text(svg, 200, 300, '第一次运行：5 个目标全部判定', { size: FS.label, weight: 700 })
+    const tally = text(svg, 1720, 300, '5 个目标 · 5 次验证会话', { size: FS.small, fill: C.accent, anchor: 'end' })
     const rows = ROW_Y.map((y, index) => {
       const g = group(svg)
-      const cy = y + 31
-      const bg = rect(g, 200, y, 1520, 62, { r: 14, fill: C.panel, stroke: C.line })
+      const cy = y + ROW_H / 2
+      const bg = rect(g, 200, y, 1520, ROW_H, { r: 14, fill: C.panel, stroke: C.line })
       text(g, 240, cy, `目标 ${index + 1}`, { size: FS.body, weight: 600 })
-      const anchor = chip(g, 720, cy, 220, 44, `锚点 ${TOKENS[index]!}`, {
+      const anchor = chip(g, 620, cy, 220, 44, `锚点 ${TOKENS[index]!}`, {
         color: C.frozen,
         mono: true,
         size: FS.small,
         textFill: C.frozen,
       })
-      const gavel = icon(g, Gavel, 1100, cy, 32, C.accent)
-      const check = icon(g, Check, 1100, cy, 32, C.pass)
-      const status = chip(g, 1380, cy, 460, 46, '起验证会话判定', { color: C.accent, size: FS.small, textFill: C.accent })
+      const gavel = icon(g, Gavel, 1160, cy, 32, C.accent)
+      const check = icon(g, Check, 1160, cy, 32, C.pass)
+      const status = chip(g, 1450, cy, 460, 46, '起验证会话判定', { color: C.accent, size: FS.small, textFill: C.accent })
       return { g, bg, anchor, gavel, check, status }
     })
-    const changeBadge = chip(svg, 460, ROW_Y[0]! + 31, 200, 42, '对象已修改', {
+    const changeBadge = chip(svg, 420, ROW_Y[0]! + ROW_H / 2, 160, 42, '对象已修改', {
       color: C.run,
       size: FS.small,
       textFill: C.run,
     })
 
     // ================= 只为变化的部分付钱 =================
-    const costL = rect(svg, 240, 196, 640, 210, { r: 16, fill: C.panel, stroke: C.line })
-    const costR = rect(svg, 1040, 196, 680, 210, { r: 16, fill: C.panel, stroke: C.line })
-    const costLTitle = text(svg, 280, 240, '第一次运行', { size: FS.label, weight: 700 })
-    const costRTitle = text(svg, 1080, 240, '改动 1 个目标之后重跑', { size: FS.label, weight: 700 })
+    const costL = rect(svg, 200, 170, 640, 200, { r: 16, fill: C.panel, stroke: C.line })
+    const costR = rect(svg, 960, 170, 680, 200, { r: 16, fill: C.panel, stroke: C.line })
+    const costLTitle = text(svg, 240, 214, '第一次运行', { size: FS.label, weight: 700 })
+    const costRTitle = text(svg, 1000, 214, '改动 1 个目标之后重跑', { size: FS.label, weight: 700 })
     const squares = [0, 1, 2, 3, 4].map((i) => ({
-      left: rect(svg, 300 + i * PITCH, 296, SQ, SQ, { r: 10, fill: C.accent, stroke: C.accent }),
-      right: rect(svg, 1100 + i * PITCH, 296, SQ, SQ, {
+      left: rect(svg, 260 + i * PITCH, 254, SQ, SQ, { r: 10, fill: C.accent, stroke: C.accent }),
+      right: rect(svg, 1020 + i * PITCH, 254, SQ, SQ, {
         r: 10,
         fill: i === 0 ? C.accent : C.panel,
         stroke: i === 0 ? C.accent : C.pass,
       }),
     }))
-    const costLLabel = text(svg, 439, 372, '5 个目标 · 5 次验证会话', { size: FS.small, fill: C.accent, anchor: 'middle' })
-    const costRLabel = text(svg, 1239, 372, '1 次验证会话 · 4 次继承', { size: FS.small, fill: C.pass, anchor: 'middle' })
-    const costArrow = path(svg, curve(900, 300, 1026, 300), { color: C.text, sw: 4, head: true })
-    const costNote = text(svg, 960, 442, '只为真正变化的那部分付钱', { size: FS.body, fill: C.pass, anchor: 'middle', weight: 700 })
+    const costLLabel = text(svg, 399, 322, '5 个目标 · 5 次验证会话', { size: FS.small, fill: C.accent, anchor: 'middle' })
+    const costRLabel = text(svg, 1159, 322, '1 次验证会话 · 4 次继承', { size: FS.small, fill: C.pass, anchor: 'middle' })
+    const costArrow = path(svg, curve(852, 270, 948, 270), { color: C.text, sw: 4, head: true })
+    const costNote = text(svg, 960, 825, '只为真正变化的那部分付钱', { size: FS.body, fill: C.pass, anchor: 'middle', weight: 700 })
 
     // ================= 已知边界 =================
     const boundary = [
-      { x: 180, ic: Eye, color: C.unknown, title: '继承不重新验证', sub: '锚点不变时，看不见模型行为的漂移' },
+      { x: 140, ic: Eye, color: C.unknown, title: '继承不重新验证', sub: '锚点不变时，看不见模型行为的漂移' },
       { x: 710, ic: Gavel, color: C.unknown, title: '判定是单次的', sub: 'agentic 判定只有一次，没有投票' },
-      { x: 1240, ic: ScrollText, color: C.frozen, title: '转写路径留档', sub: '每个判定都记下验证会话的转写' },
+      { x: 1280, ic: ScrollText, color: C.frozen, title: '转写路径留档', sub: '每个判定都记下验证会话的转写' },
     ].map((b) =>
       card(svg, {
         x: b.x,
-        y: 210,
+        y: 170,
         w: 500,
         h: 200,
         icon: b.ic,
@@ -225,15 +225,16 @@ const scene: Scene = {
     fadeIn(tl, anchorNote, '>', 0.4)
 
     step('第一次运行时 5 个目标都起<em>验证会话</em>判定，把各自的锚点与结论记下来，这份记录就是后面继承的依据。')
-    appear(tl, header, undefined, { y: 10 })
+    fadeOut(tl, identityParts)
+    appear(tl, header, '>', { y: 10 })
     appear(tl, tally, '>', { y: 10 })
     appear(tl, rows.map((r) => r.g), '>-0.3', { y: 14, stagger: 0.09 })
     pop(tl, rows.map((r) => r.anchor.g), '<0.1', { from: 0.7, stagger: 0.07 })
     pop(tl, rows.map((r) => r.status.g), '<0.3', { stagger: 0.07 })
 
     step('改动之后重跑：被改过的那个目标换了新锚点，只重判它；其余 4 个锚点相同，直接 <em>inherited</em>，不起验证会话。')
-    swapText(tl, header, '重跑：改动 1 个目标')
-    swapText(tl, tally, '1 次判定 · 4 次继承', '<', { fill: C.pass })
+    const headerRerun = swapText(tl, header, '重跑：改动 1 个目标')
+    const tallyRerun = swapText(tl, tally, '1 次判定 · 4 次继承', '<', { fill: C.pass })
     const changed = rows[0]!
     recolor(tl, changed.bg, C.run)
     pop(tl, changeBadge.g, '>')
@@ -250,7 +251,7 @@ const scene: Scene = {
     })
 
     step('这就是<em>改图之后要重判多少</em>的答案：只为真正变化的那部分付钱，没变的部分直接继承上一次的结论。')
-    fadeOut(tl, identityParts)
+    fadeOut(tl, [headerRerun, tallyRerun])
     fadeIn(tl, [costL, costR], '<0.2', 0.4)
     appear(tl, [costLTitle, costRTitle], '<0.1', { y: 10, stagger: 0.08 })
     tl.fromTo(
