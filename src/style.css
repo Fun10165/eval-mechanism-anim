@@ -1,0 +1,213 @@
+:root {
+  --bg: #0b1020;
+  --panel: #121a2f;
+  --line: #2a3557;
+  --text: #e8ecf6;
+  --muted: #9aa5c4;
+  --dim: #5f6b8c;
+  --accent: #a78bfa;
+  --font: "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC", "Source Han Sans SC", "Microsoft YaHei", system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #05070f;
+  color: var(--text);
+  font-family: var(--font);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 舞台固定 1920×1080 逻辑像素，按窗口等比缩放并居中 */
+.viewport {
+  position: fixed;
+  inset: 0;
+}
+
+.stage {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1920px;
+  height: 1080px;
+  transform-origin: 0 0;
+  background: radial-gradient(1400px 800px at 70% 20%, #121a36 0%, var(--bg) 60%);
+  overflow: hidden;
+  user-select: none;
+}
+
+.canvas {
+  position: absolute;
+  inset: 0;
+  width: 1920px;
+  height: 1080px;
+}
+
+.head {
+  position: absolute;
+  left: 96px;
+  right: 96px;
+  top: 48px;
+  display: flex;
+  align-items: baseline;
+  gap: 28px;
+  pointer-events: none;
+}
+
+.head .num {
+  font-size: 30px;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 2px;
+  font-variant-numeric: tabular-nums;
+}
+
+.head .title {
+  font-size: 48px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.head .kicker {
+  margin-top: 10px;
+  font-size: 26px;
+  color: var(--muted);
+}
+
+.progress {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 6px;
+  background: var(--accent);
+  transition: width 0.4s ease;
+}
+
+.caption {
+  position: absolute;
+  left: 96px;
+  right: 96px;
+  top: 912px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  padding: 0 32px;
+  border-left: 6px solid var(--accent);
+  background: linear-gradient(90deg, rgba(167, 139, 250, 0.1), rgba(167, 139, 250, 0) 70%);
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+.caption p {
+  margin: 0;
+  font-size: 31px;
+  line-height: 1.5;
+  color: var(--text);
+  transition: opacity 0.25s ease;
+}
+
+.caption p.fade {
+  opacity: 0;
+}
+
+.caption em {
+  font-style: normal;
+  font-weight: 700;
+  color: #c4b5fd;
+}
+
+.dots {
+  position: absolute;
+  right: 96px;
+  top: 1046px;
+  display: flex;
+  gap: 10px;
+}
+
+.dots i {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--line);
+}
+
+.dots i.done {
+  background: var(--dim);
+}
+
+.dots i.now {
+  background: var(--accent);
+}
+
+.hint {
+  position: absolute;
+  left: 96px;
+  top: 1042px;
+  font-size: 18px;
+  color: var(--dim);
+  pointer-events: none;
+}
+
+.hint b {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* 目录：O / Esc 打开 */
+.overview {
+  position: absolute;
+  inset: 0;
+  padding: 120px 140px;
+  background: rgba(5, 7, 15, 0.94);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+  align-content: start;
+}
+
+.overview.hidden {
+  display: none;
+}
+
+.overview button {
+  text-align: left;
+  font-family: inherit;
+  color: var(--text);
+  background: var(--panel);
+  border: 2px solid var(--line);
+  border-radius: 14px;
+  padding: 26px 30px;
+  cursor: pointer;
+}
+
+.overview button:hover,
+.overview button:focus-visible,
+.overview button.now {
+  border-color: var(--accent);
+  outline: none;
+}
+
+.overview .n {
+  font-size: 24px;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.overview .t {
+  margin-top: 8px;
+  font-size: 32px;
+  font-weight: 700;
+}
+
+.overview .k {
+  margin-top: 10px;
+  font-size: 21px;
+  color: var(--muted);
+  line-height: 1.45;
+}
