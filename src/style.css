@@ -61,11 +61,28 @@ body {
 }
 
 .head .num {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: none;
+  color: var(--accent);
+}
+
+.head .num-main {
   font-size: 30px;
   font-weight: 600;
-  color: var(--accent);
   letter-spacing: 2px;
   font-variant-numeric: tabular-nums;
+}
+
+.head .num-sub {
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.head .num-sub:empty {
+  display: none;
 }
 
 .head .title {
@@ -210,4 +227,124 @@ body {
   font-size: 21px;
   color: var(--muted);
   line-height: 1.45;
+}
+
+/* 常驻背景：两团光慢慢漂移，画面停在某一步时也不完全静止；减少动态效果的系统设置下关闭 */
+.stage::before {
+  content: '';
+  position: absolute;
+  inset: -20%;
+  background:
+    radial-gradient(520px 420px at 22% 30%, rgba(96, 165, 250, 0.09), transparent 70%),
+    radial-gradient(600px 480px at 78% 72%, rgba(167, 139, 250, 0.1), transparent 70%);
+  animation: drift 38s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+@keyframes drift {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate(4%, -3%) rotate(4deg);
+  }
+  100% {
+    transform: translate(-3%, 4%) rotate(-3deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stage::before {
+    animation: none;
+  }
+}
+
+/* 舞台上的讲稿（N 键）：排练用 */
+.notes {
+  position: absolute;
+  left: 96px;
+  right: 96px;
+  bottom: 180px;
+  max-height: 520px;
+  overflow: auto;
+  padding: 28px 36px;
+  background: rgba(5, 7, 15, 0.92);
+  border: 2px solid var(--accent);
+  border-radius: 14px;
+  font-size: 28px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  color: var(--text);
+}
+
+.notes.hidden {
+  display: none;
+}
+
+/* 演讲者视图（?presenter=1）：普通网页排版，不缩放 */
+body.presenter-body {
+  overflow: auto;
+  background: var(--bg);
+}
+
+.presenter {
+  display: grid;
+  gap: 20px;
+  padding: 28px 40px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.p-top {
+  display: flex;
+  gap: 28px;
+  align-items: baseline;
+  font-size: 20px;
+  color: var(--muted);
+}
+
+.p-title {
+  font-size: 30px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.p-clock {
+  margin-left: auto;
+  font-size: 34px;
+  font-weight: 700;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.p-caption {
+  font-size: 24px;
+  padding-left: 16px;
+  border-left: 5px solid var(--accent);
+}
+
+.p-caption em {
+  font-style: normal;
+  font-weight: 700;
+  color: #c4b5fd;
+}
+
+.p-speech {
+  font-size: 30px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+
+.p-visual,
+.p-keys {
+  font-size: 19px;
+  color: var(--dim);
+}
+
+.p-next {
+  font-size: 22px;
+  color: var(--muted);
+  padding: 14px 18px;
+  border: 1px dashed var(--line);
+  border-radius: 10px;
 }

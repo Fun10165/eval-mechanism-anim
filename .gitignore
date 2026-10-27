@@ -15,6 +15,13 @@ dist-ssr
 # 中间结果（截图检查等）
 .work
 
+# 备份文件
+*.bak.*
+*.bak
+
+# DDoG 运行时会话记录（从别处复制过来的状态，不是源码）
+**/.omp/ddog/sessions/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

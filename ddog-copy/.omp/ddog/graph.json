@@ -1,0 +1,338 @@
+{
+	"schemaVersion": "0.1",
+	"id": "copy-quality",
+	"root": "root",
+	"input": {
+		"file": "input.md",
+		"text": "听众只听过 Agent 概念；整场 35 分钟；讲稿要按因果链推进，数字可追溯，未完成结果标成进行中。"
+	},
+	"createdAt": "2026-10-19T15:10:00.000Z",
+	"updatedAt": "2026-10-19T15:10:00.000Z",
+	"rootSlots": [
+		{
+			"slot": "只听过 Agent 概念的听众",
+			"candidates": [
+				"reception-spoken",
+				"reception-terms",
+				"reception-no-list",
+				"reception-no-cliche"
+			]
+		},
+		{
+			"slot": "三十五分钟内",
+			"candidates": [
+				"reception-density",
+				"reception-transition"
+			]
+		},
+		{
+			"slot": "沿着一条因果链听懂",
+			"candidates": [
+				"claim-one-sentence",
+				"claim-advance",
+				"evidence-example",
+				"evidence-mechanism"
+			]
+		},
+		{
+			"slot": "相信结果可复核",
+			"candidates": [
+				"evidence-number",
+				"fidelity-in-progress",
+				"fidelity-limits",
+				"record-path",
+				"record-denominator"
+			]
+		}
+	],
+	"nodes": {
+		"root": {
+			"id": "root",
+			"definition": "这份讲稿让只听过 Agent 概念的听众在三十五分钟内沿着一条因果链听懂长程任务评测机制，并相信结果可复核。",
+			"kind": "root",
+			"parentId": null,
+			"level": 0,
+			"createdAt": "2026-10-19T15:10:00.000Z"
+		},
+		"claim": {
+			"id": "claim",
+			"definition": "讲稿有一个可以在开头和结尾复述的判断，每一节都在推进这个判断。",
+			"kind": "formal",
+			"parentId": "root",
+			"level": 1,
+			"createdAt": "2026-10-19T15:10:00.000Z",
+			"formal": {
+				"observations": []
+			}
+		},
+		"claim-one-sentence": {
+			"id": "claim-one-sentence",
+			"definition": "开头用一句话说出全场的判断，结尾用同一句话收住。",
+			"kind": "candidate",
+			"parentId": "claim",
+			"level": 2,
+			"createdAt": "2026-10-19T15:10:00.000Z",
+			"candidate": {
+				"source": "production",
+				"failureDescription": "讲稿开头说“先确认有没有按规则走”，结尾换成“定位、比较和复跑的口径”，主张没有原样收住。",
+				"exampleIndex": 1,
+				"trigger": "开头与结尾的主张措辞不一致。",
+				"observations": []
+			}
+		},
+		"claim-advance": {
+			"id": "claim-advance",
+			"definition": "每一节都回答上一节留下的问题，节与节之间没有并列跳转。",
+			"kind": "candidate",
+			"parentId": "claim",
+			"level": 2,
+			"createdAt": "2026-10-19T15:10:00.000Z",
+			"candidate": {
+				"source": "production",
+				"failureDescription": "讲稿大体按因果链推进，但判定器与 DoG 之间缺少一句“规则清单从哪里来”的过渡。",
+				"exampleIndex": 2,
+				"trigger": "判定器一节直接结束，下一节从 DoG 的定义开始。",
+				"observations": []
+			}
+		},
+		"warrant": {
+			"id": "warrant",
+			"definition": "每个关键判断都有具体例子、数字或机制支撑，不只给结论。",
+			"kind": "formal",
+			"parentId": "root",
+			"level": 1,
+			"createdAt": "2026-10-19T15:10:00.000Z",
+			"formal": {
+				"observations": []
+			}
+		},
+		"evidence-example": {
+			"id": "evidence-example",
+			"definition": "抽象判断前先给一个具体失败例子，听众能看见它发生在哪一步。",
+			"kind": "candidate",
+			"parentId": "warrant",
+			"level": 2,
+			"createdAt": "2026-10-19T15:10:00.000Z",
+			"candidate": {
+				"source": "production",
+				"failureDescription": "讲稿有 Jetsnack 例子，但后半程的“上下文腐化”没有对应的真实失败案例。",
+				"exampleIndex": 3,
+				"trigger": "自迭代一节只讲隔离和冻结，没有给一个上下文被污染的具体例子。",
+				"observations": []
+			}
+		},
+		"evidence-mechanism": {
+			"id": "evidence-mechanism",
+			"definition": "解释一个机制时说明它解决前一个例子里的哪个困难，不只给机制名称。",
+			"kind": "candidate",
+			"parentId": "warrant",
+			"level": 2,
+			"createdAt": "2026-10-19T15:10:00.000Z",
+			"candidate": {
+				"source": "production",
+				"failureDescription": "DoG 与 DDoG 的段落解释了结构，但没有始终回指前面的比较对象问题。",
+				"exampleIndex": 4,
+				"trigger": "DoG 一节从“规则清单从哪里来”开始，没有接回 B 候选偏离的例子。",
+				"observations": []
+			}
+		},
+		"evidence-number": {
+			"id": "evidence-number",
+			"definition": "每个数字都说明分母、样本和实验条件。",
+			"kind": "candidate",
+			"parentId": "warrant",
+			"level": 2,
+			"createdAt": "2026-10-19T15:10:00.000Z",
+			"candidate": {
+				"source": "production",
+				"failureDescription": "结果部分给出 328、4、11，却没有在同一段说明分母是规则条数还是候选份数。",
+				"exampleIndex": 5,
+				"trigger": "结果部分直接写 328 条通过、4 条不通过、11 条无法观察。",
+				"observations": []
+			}
+		},
+		"fidelity": {
+			"id": "fidelity",
+			"definition": "讲稿没有把未完成写成结论，也没有省略边界。",
+			"kind": "formal",
+			"parentId": "root",
+			"level": 1,
+			"createdAt": "2026-10-19T15:10:00.000Z",
+			"formal": {
+				"observations": []
+			}
+		},
+		"fidelity-in-progress": {
+			"id": "fidelity-in-progress",
+			"definition": "正在跑的实验明确标成进行中，不和已完成结果共用结论。",
+			"kind": "candidate",
+			"parentId": "fidelity",
+			"level": 2,
+			"createdAt": "2026-10-19T15:10:00.000Z",
+			"candidate": {
+				"source": "production",
+				"failureDescription": "讲稿已经写了“技能自迭代实验还在跑”，这一条目前通过。",
+				"exampleIndex": 6,
+				"trigger": "结果部分明确写了“这批数字还没有完成，我不把它写成结论”。",
+				"observations": []
+			}
+		},
+		"fidelity-limits": {
+			"id": "fidelity-limits",
+			"definition": "讲稿保留失败、无法观察和已知边界，不把未完成写成通过。",
+			"kind": "candidate",
+			"parentId": "fidelity",
+			"level": 2,
+			"createdAt": "2026-10-19T15:10:00.000Z",
+			"candidate": {
+				"source": "production",
+				"failureDescription": "讲稿结尾写了机制不保证最守规矩的一份最好，也把最终验收留给人。",
+				"exampleIndex": 7,
+				"trigger": "收尾段落明确写了保证与不保证。",
+				"observations": []
+			}
+		},
+		"record": {
+			"id": "record",
+			"definition": "听众能沿着讲稿找到原始记录，并自己复算关键数字。",
+			"kind": "formal",
+			"parentId": "root",
+			"level": 1,
+			"createdAt": "2026-10-19T15:10:00.000Z",
+			"formal": {
+				"observations": []
+			}
+		},
+		"record-path": {
+			"id": "record-path",
+			"definition": "关键数字、截图和报告在讲稿里有可查的路径。",
+			"kind": "candidate",
+			"parentId": "record",
+			"level": 2,
+			"createdAt": "2026-10-19T15:10:00.000Z",
+			"candidate": {
+				"source": "production",
+				"failureDescription": "讲稿没有给出任何截图路径、报告路径或命令，听众无法按讲稿复查。",
+				"exampleIndex": 8,
+				"trigger": "结果部分只有数字，没有文件路径。",
+				"observations": []
+			}
+		},
+		"record-denominator": {
+			"id": "record-denominator",
+			"definition": "通过率、成本、轮次的口径写清楚，别人能按同一口径复算。",
+			"kind": "candidate",
+			"parentId": "record",
+			"level": 2,
+			"createdAt": "2026-10-19T15:10:00.000Z",
+			"candidate": {
+				"source": "production",
+				"failureDescription": "讲稿没有说明 328 条规则结果的分母，也没有说明成本包含运行还是判定。",
+				"exampleIndex": 9,
+				"trigger": "结果部分的数字没有口径说明。",
+				"observations": []
+			}
+		},
+		"reception": {
+			"id": "reception",
+			"definition": "讲稿是说的，不是念的；听众能接住每个术语和转折。",
+			"kind": "formal",
+			"parentId": "root",
+			"level": 1,
+			"createdAt": "2026-10-19T15:10:00.000Z",
+			"formal": {
+				"observations": []
+			}
+		},
+		"reception-spoken": {
+			"id": "reception-spoken",
+			"definition": "句子按口语节奏写，听众一遍能跟上，不用回看。",
+			"kind": "candidate",
+			"parentId": "reception",
+			"level": 2,
+			"createdAt": "2026-10-19T15:10:00.000Z",
+			"candidate": {
+				"source": "production",
+				"failureDescription": "部分段落一句里塞了多个新概念，口语上不容易一遍接住。",
+				"exampleIndex": 10,
+				"trigger": "判定器一节同时讲证据冻结、隔离会话、三种读法和排名。",
+				"observations": []
+			}
+		},
+		"reception-terms": {
+			"id": "reception-terms",
+			"definition": "第一次出现的术语在当场用一句常见中文解释。",
+			"kind": "candidate",
+			"parentId": "reception",
+			"level": 2,
+			"createdAt": "2026-10-19T15:10:00.000Z",
+			"candidate": {
+				"source": "production",
+				"failureDescription": "技能文本、单元、判定器、DoG、DDoG 都有解释，但“锚点”“继承”出现时解释不够。",
+				"exampleIndex": 11,
+				"trigger": "继承一节出现锚点与继承，没有先给一句常见中文解释。",
+				"observations": []
+			}
+		},
+		"reception-transition": {
+			"id": "reception-transition",
+			"definition": "每节开头接住上一节的结论，听众知道为什么现在讲这个。",
+			"kind": "candidate",
+			"parentId": "reception",
+			"level": 2,
+			"createdAt": "2026-10-19T15:10:00.000Z",
+			"candidate": {
+				"source": "production",
+				"failureDescription": "大多数小节有过渡，时间线与结果之间缺少一句收束上一段的过渡。",
+				"exampleIndex": 12,
+				"trigger": "时间线结束后直接进入结果数字。",
+				"observations": []
+			}
+		},
+		"reception-density": {
+			"id": "reception-density",
+			"definition": "一段只推进一个判断，不在一段里塞多个新概念。",
+			"kind": "candidate",
+			"parentId": "reception",
+			"level": 2,
+			"createdAt": "2026-10-19T15:10:00.000Z",
+			"candidate": {
+				"source": "production",
+				"failureDescription": "判定器一节和结果一节的信息密度偏高。",
+				"exampleIndex": 13,
+				"trigger": "判定器一节一段里同时讲隔离、超时、三种读法。",
+				"observations": []
+			}
+		},
+		"reception-no-list": {
+			"id": "reception-no-list",
+			"definition": "讲稿用因果叙述推进，不把要点念成并列清单。",
+			"kind": "candidate",
+			"parentId": "reception",
+			"level": 2,
+			"createdAt": "2026-10-19T15:10:00.000Z",
+			"candidate": {
+				"source": "production",
+				"failureDescription": "讲稿整体是叙述，但判定器的“两个纪律”和结果的数字排列接近清单口吻。",
+				"exampleIndex": 14,
+				"trigger": "“第一，……第二，……”和结果数字段。",
+				"observations": []
+			}
+		},
+		"reception-no-cliche": {
+			"id": "reception-no-cliche",
+			"definition": "不使用比喻、黑话、感叹号和破折号，词义能在词典里查到。",
+			"kind": "candidate",
+			"parentId": "reception",
+			"level": 2,
+			"createdAt": "2026-10-19T15:10:00.000Z",
+			"candidate": {
+				"source": "production",
+				"failureDescription": "讲稿没有感叹号和比喻，但仍有少量抽象词可以换成更常见的说法。",
+				"exampleIndex": 15,
+				"trigger": "“口径”“归一化”等词没有解释。",
+				"observations": []
+			}
+		}
+	}
+}

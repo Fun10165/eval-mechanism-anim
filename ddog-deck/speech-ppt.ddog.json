@@ -1,0 +1,135 @@
+{
+	"schemaVersion": "0.1",
+	"id": "speech-ppt",
+	"root": "root",
+	"input": {
+		"file": "/Users/fun10165/Developer/eval-mechanism-anim/ddog-deck/input.md",
+		"text": "演讲 PPT 面向只听过 Agent 概念的技术同事，约 35 分钟；讲清长程任务的指令违反定位、稳定判定、技能自迭代与可复核结果；已完成和进行中的实验分开写。"
+	},
+	"createdAt": "2026-10-19T16:30:00.000Z",
+	"updatedAt": "2026-10-19T16:30:00.000Z",
+	"nodes": {
+		"root": {
+			"id": "root",
+			"definition": "这是一份约三十五分钟的演讲 PPT，让只听过 Agent 概念的听众理解并相信：长程任务里的指令违反可以定位到单元、规则和证据，判定稳定，归因到技能的部分可以改写，并且只重跑变化的部分。",
+			"kind": "root",
+			"parentId": null,
+			"level": 0,
+			"createdAt": "2026-10-19T16:30:00.000Z"
+		},
+		"credible": {
+			"id": "credible",
+			"definition": "PPT 里的事实、数字和边界都能回到原始记录，没有把进行中的实验写成已完成，也没有把遵循度当成最终交付质量。",
+			"kind": "candidate",
+			"parentId": "root",
+			"level": 1,
+			"createdAt": "2026-10-19T16:30:00.000Z",
+			"candidate": {
+				"source": "simulation",
+				"failureDescription": "如果页面出现无法回到原始记录的数字、把进行中的实验写成完成、或把遵循度当成最终交付质量，本候选失败；证据要指向具体页号和原文。",
+				"observations": []
+			}
+		},
+		"coverage": {
+			"id": "coverage",
+			"definition": "PPT 覆盖开头承诺的段落：问题、普通 CI 的局限、贪心链、单元与回合、判定器、DoG、DDoG、自迭代、时间线、结果；没有整段跳过。",
+			"kind": "candidate",
+			"parentId": "root",
+			"level": 1,
+			"createdAt": "2026-10-19T16:30:00.000Z",
+			"candidate": {
+				"source": "simulation",
+				"failureDescription": "如果承诺的段落整段缺失或只剩标题，本候选失败；证据要列出缺失的段落和对应页号。",
+				"observations": []
+			}
+		},
+		"one-claim": {
+			"id": "one-claim",
+			"definition": "每一页只回答一个问题，并给听众一个可以带走的结论；页面上没有多主题并行或删掉也不损失信息的堆砌。",
+			"kind": "candidate",
+			"parentId": "root",
+			"level": 1,
+			"createdAt": "2026-10-19T16:30:00.000Z",
+			"candidate": {
+				"source": "simulation",
+				"failureDescription": "如果一页同时推进多个主题，或者听众说不出这页想说什么，本候选失败；证据要引用页号和页内冗余文字。",
+				"observations": []
+			}
+		},
+		"readable": {
+			"id": "readable",
+			"definition": "只听过 Agent 概念的听众能跟上：术语第一次出现就解释，页与页之间有承接，单页密度不超过一次能接住的程度。",
+			"kind": "candidate",
+			"parentId": "root",
+			"level": 1,
+			"createdAt": "2026-10-19T16:30:00.000Z",
+			"candidate": {
+				"source": "simulation",
+				"failureDescription": "如果术语首次出现没有解释、页与页硬跳、或一页同时塞进多个新概念，本候选失败；证据要引用页号和术语。",
+				"observations": []
+			}
+		},
+		"no-slop": {
+			"id": "no-slop",
+			"definition": "页面没有模板腔、空口号、含糊程度词，也没有用对比句式或万能句填充内容。",
+			"kind": "candidate",
+			"parentId": "root",
+			"level": 1,
+			"createdAt": "2026-10-19T16:30:00.000Z",
+			"candidate": {
+				"source": "simulation",
+				"failureDescription": "如果出现模板腔、无数字的空口号、含糊程度词或可套进任何演讲的句子，本候选失败；证据要引用原句和页号。",
+				"observations": []
+			}
+		},
+		"visual": {
+			"id": "visual",
+			"definition": "每页渲染后没有文字重叠、溢出、截断、遮挡；关键数字和结论在投影距离下可读。",
+			"kind": "candidate",
+			"parentId": "root",
+			"level": 1,
+			"createdAt": "2026-10-19T16:30:00.000Z",
+			"candidate": {
+				"source": "simulation",
+				"failureDescription": "如果渲染后出现文字重叠、溢出、截断、遮挡，或关键数字在投影距离下不可读，本候选失败；证据要给出页号和渲染截图路径。",
+				"observations": []
+			}
+		},
+		"figure": {
+			"id": "figure",
+			"definition": "该用图的关系用图表示，图表和结论互相指得到，图或动画确实支撑页面说的判断。",
+			"kind": "candidate",
+			"parentId": "root",
+			"level": 1,
+			"createdAt": "2026-10-19T16:30:00.000Z",
+			"candidate": {
+				"source": "simulation",
+				"failureDescription": "如果该用图的关系只用文字列表，或图与结论互相找不到，或图不支撑页面判断，本候选失败；证据要引用页号和对应图表。",
+				"observations": []
+			}
+		},
+		"takeaway": {
+			"id": "takeaway",
+			"definition": "结尾回到开头的主张，写清这套机制保证什么、不保证什么，并给听众一个明确的下一步或带走句。",
+			"kind": "candidate",
+			"parentId": "root",
+			"level": 1,
+			"createdAt": "2026-10-19T16:30:00.000Z",
+			"candidate": {
+				"source": "simulation",
+				"failureDescription": "如果结尾没有回到开头主张、没有写清保证与不保证的边界，或听众不知道该带走哪一句，本候选失败；证据要引用首尾页原文。",
+				"observations": []
+			}
+		}
+	},
+	"rootSlots": [
+		{ "slot": "内容可信", "candidates": ["credible"] },
+		{ "slot": "覆盖承诺的段落", "candidates": ["coverage"] },
+		{ "slot": "每页一个主张", "candidates": ["one-claim"] },
+		{ "slot": "听众能跟上", "candidates": ["readable"] },
+		{ "slot": "没有模板腔", "candidates": ["no-slop"] },
+		{ "slot": "渲染无缺陷", "candidates": ["visual"] },
+		{ "slot": "图表支撑判断", "candidates": ["figure"] },
+		{ "slot": "结尾收住", "candidates": ["takeaway"] }
+	]
+}

@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "tsc && vite build && vite build --mode final",
     "preview": "vite preview"
   },
   "devDependencies": {
@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "gsap": "3.15.0",
+    "kld-intersections": "^0.7.0",
     "lucide": "1.57.0"
   }
 }

@@ -80,13 +80,18 @@ export function dim(tl: TL, targets: Targets, pos?: Pos, opacity = 0.22): TL {
 
 /**
  * 画线：路径从起点画到终点。带箭头的路径（svg.path 的 head: true）在画完时才挂上箭头。
+ * 起始状态是不可见（autoAlpha 0），还没轮到的线不会出现在画面上，也不会被重叠检查当成可见。
  * 虚线路径不要用 draw（DrawSVG 会改写 dasharray），改用 fadeIn。
  */
 export function draw(tl: TL, paths: SVGPathElement | SVGPathElement[], pos?: Pos, duration = 0.8, stagger = 0): TL {
   const list = Array.isArray(paths) ? paths : [paths]
   const heads = list.filter((p) => p.dataset.head !== undefined)
   for (const p of heads) p.setAttribute('marker-end', 'none')
-  const tween = gsap.fromTo(list, { drawSVG: '0%', autoAlpha: 1 }, { drawSVG: '100%', duration, ease: EASE.inOut, stagger })
+  const tween = gsap.fromTo(
+    list,
+    { drawSVG: '0%', autoAlpha: 0 },
+    { drawSVG: '100%', autoAlpha: 1, duration, ease: EASE.inOut, stagger },
+  )
   tl.add(tween, pos)
   const end = tween.endTime()
   for (const p of heads) tl.set(p, { attr: { 'marker-end': p.dataset.head! } }, end)
