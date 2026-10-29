@@ -8,7 +8,7 @@
  * 图来自 examples/dog-smoke-multi.graph.json：根「文章质量门禁」→「内容质量（四维）」→
  * 四片 LLM 叶子；根另有「模板词提示（辅助）」与「文件存在且非空」两片程序叶子。
  */
-import { Check, Layers, MessageSquareText, ScanEye, Target, Terminal, UserRound } from 'lucide'
+import { Check, Layers, MessageSquareText, ScanEye, Target, UserRound } from 'lucide'
 import { appear, draw, EASE, fadeIn, fadeOut, flow, gsap, pop, pulse, recolor, swapText } from '../../lib/fx'
 import type { TL } from '../../lib/fx'
 import { card, chip, circle, curve, group, icon, line, path, rect, text, vcurve } from '../../lib/svg'
@@ -18,7 +18,7 @@ import { C } from '../../theme'
 
 const ROOT = { x: 660, y: 192, w: 600, h: 108, cx: 960 } as const
 const CONTENT = { x: 400, y: 340, w: 580, h: 96, cx: 690 } as const
-const PROG_CX = [1190, 1550] as const
+const PROP_CX = [1250, 1480, 1710] as const
 const LEAF_X = [220, 460, 700, 940] as const
 const LEAF_CX = [330, 570, 810, 1050] as const
 const LEAF = { y: 540, w: 220, h: 170 } as const
@@ -31,18 +31,22 @@ const EDGE_STOP = 4
 interface LeafSpec {
   name: string
   sub: string
+  mode: '脚本' | 'LLM 判定'
 }
 
+/** 可复核这一处的四条下位内涵：点名的失败都能各自独立发生。 */
 const LEAVES: LeafSpec[] = [
-  { name: 'AI-slop 味', sub: '逐句判定' },
-  { name: '信息密度与趣味', sub: '逐段判定' },
-  { name: '易懂', sub: '符合认知规律' },
-  { name: '人类质感', sub: '句式与细节' },
+  { name: '证据可获取', sub: '脚本 · 必过', mode: '脚本' },
+  { name: '步骤可重算', sub: '参数与顺序写全', mode: 'LLM 判定' },
+  { name: '数值可对齐', sub: '口径与判定一致', mode: 'LLM 判定' },
+  { name: '取样不挑选', sub: '排除标准写清', mode: 'LLM 判定' },
 ]
 
-const PROGRAMS = [
-  { name: '模板词提示（辅助）', sub: '脚本 · 可容忍' },
-  { name: '文件存在且非空', sub: '脚本 · 必过' },
+/** 根定义里另外三处内涵，先各占一片叶子；它们自己还能继续拆。 */
+const PROPS = [
+  { name: '读者相信', sub: '依据支撑判断' },
+  { name: '读者采用', sub: '判断可被使用' },
+  { name: '核心判断', sub: '主张唯一且清楚' },
 ]
 
 interface StateChip {
@@ -160,7 +164,38 @@ const scene: Scene = {
     })
     const dagDots = dagEdges.map(() => circle(dagGraph, 0, 0, 4, { fill: C.accent }))
 
-    // ================= 第 3 步：根与第一层组合节点 =================
+    // ================= 第 3 步：方法：展开内涵，用失败检验 =================
+    // 整体下移，让两栏在内容区里垂直居中
+    const method = group(svg, { transform: 'translate(0 88)' })
+    const STEPS = [
+      ['定位', '失败的落点是定义里的哪一处内涵'],
+      ['展开', '那一处还包含哪些别的含义，并列成下位内涵'],
+      ['检验', '用现实的相似失败去撞；优先撞还没被碰过的'],
+      ['收口', '四问：为什么是这些、只有这些、归哪里、能否更少'],
+    ] as const
+    STEPS.forEach(([name, note], i) => {
+      const y = 250 + i * 122
+      chip(method, 320, y, 52, 52, String(i + 1), {
+        color: C.accent,
+        textFill: C.accent,
+        size: 26,
+        weight: 700,
+      })
+      text(method, 368, y, name, { size: 30, weight: 800 })
+      text(method, 368, y + 42, note, { size: 24, fill: C.muted })
+    })
+
+    rect(method, 1020, 210, 700, 436, { r: 20, fill: C.panel, stroke: C.lineSoft })
+    text(method, 1050, 252, '例：论文定义里的「以可复核证据」', { size: 26, weight: 700 })
+    text(method, 1050, 312, '下位内涵：记录 · 可重算 · 可对齐 · 取样不挑选', { size: 24 })
+    text(method, 1050, 372, '现实失败：第三方重跑，得到相反数值', { size: 24, fill: C.muted })
+    text(method, 1050, 432, '同时违反「可重算」与「取样不挑选」，两条分开写', { size: 24, fill: C.fail })
+    text(method, 1050, 492, '「记录」这一条，还没有被现实碰过', { size: 24, fill: C.unknown })
+    path(method, line(1050, 530, 1690, 530), { color: C.lineSoft, sw: 2 })
+    text(method, 1050, 570, '失败方式只用来检验，不用来堆节点', { size: 24, fill: C.muted })
+    text(method, 1050, 606, '下一层来自内涵展开，不来自失败清单', { size: 24, fill: C.muted })
+
+    // ================= 第 4 步：根与第一层组合节点 =================
     const rootCard = card(svg, {
       x: ROOT.x,
       y: ROOT.y,
@@ -170,9 +205,9 @@ const scene: Scene = {
       icon: Target,
       iconSize: 36,
       color: C.accent,
-      title: '文章质量门禁',
+      title: '学术论文',
       titleSize: 28,
-      sub: '根节点 · 保留用户原意',
+      sub: '一句话定义 · 保留用户原意',
       subSize: 24,
     })
     const rootStateLabel = text(svg, 1420, 208, '根状态', { size: 24, fill: C.muted, anchor: 'middle' })
@@ -190,9 +225,9 @@ const scene: Scene = {
       icon: Layers,
       iconSize: 30,
       color: C.accent,
-      title: '内容质量（四维）',
+      title: '可复核（证据）',
       titleSize: 28,
-      sub: '组合节点 · 继续往下拆',
+      sub: '组合节点 · 别人能重做',
       subSize: 24,
     })
     const contentChip = chip(svg, 880, 388, 160, 44, '未判定', {
@@ -200,33 +235,33 @@ const scene: Scene = {
       color: C.muted,
       textFill: C.muted,
     })
-    const contentAssert = chip(svg, 520, CONTENT.y, 150, 34, '整体断言', {
+    const contentAssert = chip(svg, 330, CONTENT.y, 150, 34, '整体断言', {
       color: C.accent,
       textFill: C.accent,
       size: 24,
     })
-    const rootAssert = chip(svg, 1180, ROOT.y, 150, 34, '整体断言', {
+    const rootAssert = chip(svg, 1340, 178, 150, 34, '整体断言', {
       color: C.accent,
       textFill: C.accent,
       size: 24,
     })
 
-    const programs = PROGRAMS.map((spec, i) => {
+    const props = PROPS.map((spec, i) => {
       const body = card(svg, {
-        x: PROG_CX[i]! - 150,
+        x: PROP_CX[i]! - 100,
         y: 350,
-        w: 300,
+        w: 200,
         h: 84,
         layout: 'left',
-        icon: Terminal,
-        iconSize: 26,
+        icon: Layers,
+        iconSize: 24,
         color: C.muted,
         title: spec.name,
         titleSize: 24,
         sub: spec.sub,
-        subSize: 24,
+        subSize: 22,
       })
-      const state = chip(svg, PROG_CX[i]!, 462, 160, 40, '未判定', {
+      const state = chip(svg, PROP_CX[i]!, 462, 150, 40, '未判定', {
         size: 24,
         color: C.muted,
         textFill: C.muted,
@@ -234,7 +269,7 @@ const scene: Scene = {
       return { body, state }
     })
 
-    // 第 3 步先用虚线轮廓提示下一层还有四片叶子，避免下半屏空着。
+    // 第 4 步先用虚线轮廓提示下一层还有四片叶子，避免下半屏空着。
     const leafGhosts = LEAF_X.map((x) =>
       rect(svg, x, LEAF.y, LEAF.w, LEAF.h, {
         r: 16,
@@ -259,7 +294,7 @@ const scene: Scene = {
         sub: leaf.sub,
         subSize: 24,
       })
-      const badge = chip(svg, LEAF_CX[i]!, LEAF_BADGE_Y, 170, 34, 'LLM 判定', {
+      const badge = chip(svg, LEAF_CX[i]!, LEAF_BADGE_Y, 170, 34, leaf.mode, {
         size: 24,
         color: C.accent,
         fill: C.bg,
@@ -277,7 +312,7 @@ const scene: Scene = {
       sw: 3,
       head: true,
     })
-    const rootToPrograms = PROG_CX.map((cx) =>
+    const rootToProps = PROP_CX.map((cx) =>
       path(svg, vcurve(ROOT.cx, ROOT.y + ROOT.h, cx, 346), { color: C.accent, sw: 3, head: true }),
     )
     const contentToLeaves = LEAF_CX.map((cx) =>
@@ -287,7 +322,7 @@ const scene: Scene = {
         head: true,
       }),
     )
-    const layerNote = text(svg, 120, 388, '抽象层：父目标\n在下一层的失败方式', {
+    const layerNote = text(svg, 120, 388, '抽象层：展开内涵\n失败方式：检验内涵', {
       size: 24,
       fill: C.muted,
       lineHeight: 1.4,
@@ -295,10 +330,10 @@ const scene: Scene = {
 
     const rootView: NodeView = { body: rootCard, state: rootChip }
     const contentView: NodeView = { body: contentCard, state: contentChip }
-    const programViews: NodeView[] = programs.map((p) => ({ body: p.body, state: p.state }))
+    const propViews: NodeView[] = props.map((p) => ({ body: p.body, state: p.state }))
     const leafViews: NodeView[] = leaves.map((leaf) => ({ body: leaf.body, state: leaf.state }))
 
-    // ================= 第 4 步：两种判据 =================
+    // ================= 第 5 步：两种判据 =================
     const leafNote = text(svg, 120, 468, '叶子只判定一件事', { size: 24, fill: C.muted })
     const sessionGroup = group(svg)
     const verifier = card(sessionGroup, {
@@ -352,7 +387,7 @@ const scene: Scene = {
       { autoAlpha: 0 },
     )
 
-    // ================= 第 5 步：每一层都有自己的判定 =================
+    // ================= 第 6 步：每一层都有自己的判定 =================
     const exampleGroup = group(svg)
     text(exampleGroup, 150, 800, '例：四片叶子都通过，父节点仍能抓到问题', {
       size: 24,
@@ -374,18 +409,18 @@ const scene: Scene = {
       w: 700,
       h: 52,
       color: C.fail,
-      title: '整体断言发现：信息密度高，但读不懂',
+      title: '整体断言发现：数据与代码不是同一版本',
       titleSize: 24,
     })
     path(exampleGroup, line(1240, 846, 1310, 846), { color: C.muted, sw: 2.5, head: true })
-    chip(exampleGroup, 1460, 846, 280, 48, '内容质量 不通过', {
+    chip(exampleGroup, 1460, 846, 280, 48, '可复核 不通过', {
       color: C.fail,
       textFill: C.fail,
       size: 24,
     })
     gsap.set([exampleGroup], { autoAlpha: 0 })
 
-    // ================= 第 6 步：失败沿边向上传播 =================
+    // ================= 第 7 步：失败沿边向上传播 =================
     const ruleBar = group(svg)
     rect(ruleBar, 300, 800, 1320, 66, { r: 14, fill: C.panel2, stroke: C.lineSoft })
     text(ruleBar, 960, 833, 'fatal 失败 → 父节点不通过；tolerable 失败 → 只算部分问题', {
@@ -395,13 +430,13 @@ const scene: Scene = {
     })
     gsap.set(ruleBar, { autoAlpha: 0 })
 
-    // ================= 第 7 步：无法判定，交给人 =================
+    // ================= 第 8 步：无法判定，交给人 =================
     const humanGroup = group(svg)
-    const humanHalo = circle(humanGroup, 1720, 248, 52, { fill: 'none', stroke: C.human, sw: 2, opacity: 0 })
-    circle(humanGroup, 1720, 248, 44, { fill: C.panel, stroke: C.human, sw: 2.5 })
-    icon(humanGroup, UserRound, 1720, 248, 40, C.human)
-    text(humanGroup, 1720, 332, '交给人', { size: 24, fill: C.human, anchor: 'middle' })
-    const handoffCurve = path(svg, curve(1570, 248, 1668, 248), { color: C.human, sw: 3, head: true })
+    const humanHalo = circle(humanGroup, 1762, 206, 46, { fill: 'none', stroke: C.human, sw: 2, opacity: 0 })
+    circle(humanGroup, 1762, 206, 38, { fill: C.panel, stroke: C.human, sw: 2.5 })
+    icon(humanGroup, UserRound, 1762, 206, 34, C.human)
+    text(humanGroup, 1762, 262, '交给人', { size: 24, fill: C.human, anchor: 'middle' })
+    const handoffCurve = path(svg, curve(1576, 240, 1706, 214), { color: C.human, sw: 3, head: true })
     const unknownNote = text(svg, 150, 800, '无法判定沿层上传，交给人处理', { size: 24, fill: C.muted })
     gsap.set([handoffCurve, unknownNote], { autoAlpha: 0 })
     gsap.set(humanGroup, { autoAlpha: 0 })
@@ -434,16 +469,17 @@ const scene: Scene = {
         contentChip.g,
         contentAssert.g,
         rootAssert.g,
-        ...programs.map((p) => p.body.g),
-        ...programs.map((p) => p.state.g),
+        ...props.map((p) => p.body.g),
+        ...props.map((p) => p.state.g),
         ...leaves.map((leaf) => leaf.body.g),
         ...leaves.map((leaf) => leaf.badge.g),
         ...leaves.map((leaf) => leaf.state.g),
         rootToContent,
-        ...rootToPrograms,
+        ...rootToProps,
         ...contentToLeaves,
         layerNote,
         leafNote,
+        method,
       ],
       { autoAlpha: 0 },
     )
@@ -501,13 +537,18 @@ const scene: Scene = {
       })
     })
 
-    // ================= 第 3 步：根与第一层 =================
+    // ================= 第 3 步：方法：展开内涵，用失败检验 =================
     step()
-    fadeOut(tl, dag, undefined, 0.4)
+    fadeOut(tl, dag, undefined, 0.35)
+    fadeIn(tl, method, '<0.1', 0.45)
+
+    // ================= 第 4 步：根与第一层 =================
+    step()
+    fadeOut(tl, [dag, method], undefined, 0.4)
     pop(tl, rootCard.g, '>0.05')
     pop(tl, contentCard.g, '>0.05')
-    appear(tl, programs.map((p) => p.body.g), '<0.1', { y: 16, stagger: 0.08 })
-    draw(tl, [rootToContent, ...rootToPrograms], '<0.1', 0.5, 0.06)
+    appear(tl, props.map((p) => p.body.g), '<0.1', { y: 16, stagger: 0.08 })
+    draw(tl, [rootToContent, ...rootToProps], '<0.1', 0.5, 0.06)
     pop(tl, [rootStateLabel, rootChip.g], '<0.1', { stagger: 0.05 })
     pop(tl, contentChip.g, '<0.05')
     appear(tl, layerNote, '<0.15', { y: 8 })
@@ -515,11 +556,11 @@ const scene: Scene = {
 
     // 常驻：结论光点沿第一层三条边往上流，根节点外圈呼吸
     const rootHalo = rect(svg, 654, 186, 612, 120, { r: 20, fill: 'none', stroke: C.accent, sw: 2, opacity: 0 })
-    const rootDots = [rootToContent, ...rootToPrograms].map(() => circle(svg, 0, 0, 6, { fill: C.accent }))
+    const rootDots = [rootToContent, ...rootToProps].map(() => circle(svg, 0, 0, 6, { fill: C.accent }))
     gsap.set(rootDots, { autoAlpha: 0 })
     idle((loop) => {
       rootDots.forEach((dot, i) => {
-        const d = [rootToContent, ...rootToPrograms][i]!
+        const d = [rootToContent, ...rootToProps][i]!
         const at = i * 0.4
         loop.fromTo(dot, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.2 }, at)
         loop.to(
@@ -547,7 +588,7 @@ const scene: Scene = {
       loop.set(rootHalo, { opacity: 0 }, 3)
     })
 
-    // ================= 第 4 步：两种判据 =================
+    // ================= 第 5 步：两种判据 =================
     step()
     fadeOut(tl, leafGhosts, undefined, 0.3)
     appear(tl, leafNote, '>0.05', { y: 8 })
@@ -555,7 +596,7 @@ const scene: Scene = {
     appear(tl, leaves.map((leaf) => leaf.body.g), '<0.05', { y: 18, stagger: 0.07 })
     pop(tl, leaves.map((leaf) => leaf.badge.g), '>0.15', { stagger: 0.05 })
     pop(tl, leaves.map((leaf) => leaf.state.g), '<0.05', { stagger: 0.04 })
-    pop(tl, programs.map((p) => p.state.g), '>0.1', { stagger: 0.05 })
+    pop(tl, props.map((p) => p.state.g), '>0.1', { stagger: 0.05 })
     pop(tl, verifier.g, '>0.15')
     draw(tl, [sessionBus, ...sessionStubs, sessionStem], '<0.1', 0.4, 0.04)
     draw(tl, verdictArrow, '>0.1', 0.3)
@@ -573,7 +614,7 @@ const scene: Scene = {
       loop.set(sessionDot, { x: 0, autoAlpha: 0 }, 2.8)
     })
 
-    // ================= 第 5 步：每一层都有自己的判定 =================
+    // ================= 第 6 步：每一层都有自己的判定 =================
     step()
     fadeOut(tl, [sessionGroup, freezeNote], undefined, 0.35)
     pop(tl, [rootAssert.g, contentAssert.g], '>0.05', { stagger: 0.08 })
@@ -587,28 +628,28 @@ const scene: Scene = {
     setNodeState(tl, rootView, '不通过', C.fail, C.fail, '>0.2')
     pulse(tl, rootCard.g, '<0.1', 1.03)
 
-    // ================= 第 6 步：失败沿边向上传播 =================
+    // ================= 第 7 步：失败沿边向上传播 =================
     step()
     fadeOut(tl, exampleGroup, undefined, 0.3)
     // 先复位到全部通过，再分别观察可容忍失败与必过失败。
     resetAllPass()
     fadeIn(tl, ruleBar, '>0.15', 0.4)
     // 可容忍项失败：根记为部分，不变成不通过。
-    setNodeState(tl, programViews[0]!, '不通过', C.fail, C.fail, '>0.2')
-    flowUp(tl, svg, rootToPrograms[0]!, C.fail, '<0.1')
+    setNodeState(tl, propViews[1]!, '不通过', C.fail, C.fail, '>0.2')
+    flowUp(tl, svg, rootToProps[1]!, C.fail, '<0.1')
     setNodeState(tl, rootView, '部分', C.muted, C.muted, '>0.2')
     pulse(tl, rootChip.g, '<0.2', 1.05)
     // 停一下，让“部分”这个中间状态看得清。
     tl.to({}, { duration: 0.9 }, '>0.2')
     // 必过项失败：叶子的失败先到内容质量，再传到根。
-    setNodeState(tl, leafViews[0]!, '不通过', C.fail, C.fail, '>0.3')
-    flowUp(tl, svg, contentToLeaves[0]!, C.fail, '<0.1')
+    setNodeState(tl, leafViews[3]!, '不通过', C.fail, C.fail, '>0.3')
+    flowUp(tl, svg, contentToLeaves[3]!, C.fail, '<0.1')
     setNodeState(tl, contentView, '不通过', C.fail, C.fail, '>0.2')
     flowUp(tl, svg, rootToContent, C.fail, '<0.1')
     setNodeState(tl, rootView, '不通过', C.fail, C.fail, '>0.2')
     pulse(tl, rootCard.g, '<0.1', 1.04)
 
-    // ================= 第 7 步：无法判定，交给人 =================
+    // ================= 第 8 步：无法判定，交给人 =================
     step()
     fadeOut(tl, ruleBar, undefined, 0.3)
     resetAllPass()
@@ -643,7 +684,7 @@ const scene: Scene = {
       setNodeState(tl, rootView, '通过', C.pass, C.pass, '<')
       setNodeState(tl, contentView, '通过', C.pass, C.pass, '<')
       leafViews.forEach((view) => setNodeState(tl, view, '通过', C.pass, C.pass, '<'))
-      programViews.forEach((view) => setNodeState(tl, view, '通过', C.pass, C.pass, '<'))
+      propViews.forEach((view) => setNodeState(tl, view, '通过', C.pass, C.pass, '<'))
     }
   },
 }

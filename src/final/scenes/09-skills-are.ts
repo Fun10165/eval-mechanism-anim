@@ -99,14 +99,16 @@ const PRINCIPLES: Array<{ q: string; gloss: string; hint?: string }> = [
 ]
 
 const BARS = [
-  { cx: 560, w: 140, label: '无 skills', value: null, color: C.dim },
+  { cx: 560, w: 140, label: '无 skills', value: 0, color: C.dim },
   { cx: 740, w: 140, label: '人整理', value: 16.2, color: C.pass },
-  { cx: 920, w: 140, label: '模型自生成', value: null, color: C.dim },
-  { cx: 1280, w: 160, label: '精简（人整理）', value: 18.9, color: C.pass },
-  { cx: 1510, w: 160, label: '面面俱到（人整理）', value: 5.7, color: C.pass },
+  { cx: 920, w: 140, label: '模型自生成', value: -1.3, color: C.fail },
+  { cx: 1280, w: 160, label: '详细（人整理）', value: 18.8, color: C.pass },
+  { cx: 1510, w: 160, label: '面面俱到（人整理）', value: -2.9, color: C.fail },
 ] as const
 
-const UNIT = 22
+const UNIT = 20
+/** 零线：正值向上，负值向下 */
+const BASE = 720
 
 const scene: Scene = {
   id: 'skills-are',
@@ -165,39 +167,43 @@ const scene: Scene = {
 
     // 第三步：SkillsBench 的相对增益柱
     const chart = group(svg)
-    text(chart, 420, 236, 'SkillsBench：86 个任务、7,308 条运行记录', { size: 26, weight: 700 })
+    text(chart, 420, 236, 'SkillsBench：84 个任务、7,308 条运行记录', { size: 26, weight: 700 })
     text(chart, 420, 278, '相对无 skills 的增益（百分点）', { size: 24, fill: C.muted })
-    path(chart, line(430, 780, 1760, 780), { color: C.line, sw: 2 })
+    text(chart, 1760, 278, '2026 年 2 月 · arXiv 2602.12670 v1', { size: 24, fill: C.muted, anchor: 'end' })
+    path(chart, line(430, BASE, 1760, BASE), { color: C.line, sw: 2 })
     for (const tick of [0, 5, 10, 15, 20]) {
-      path(chart, line(430, 780 - tick * UNIT, 444, 780 - tick * UNIT), { color: C.lineSoft, sw: 2 })
-      text(chart, 418, 780 - tick * UNIT, String(tick), { size: 24, fill: C.muted, anchor: 'end' })
+      path(chart, line(430, BASE - tick * UNIT, 444, BASE - tick * UNIT), { color: C.lineSoft, sw: 2 })
+      text(chart, 418, BASE - tick * UNIT, String(tick), { size: 24, fill: C.muted, anchor: 'end' })
     }
-    text(chart, 1395, 292, '人整理的两类', { size: 24, fill: C.muted, anchor: 'middle' })
-    path(chart, line(1100, 310, 1100, 780), { color: C.lineSoft, sw: 2, dash: '4 10' })
+    path(chart, line(1100, 320, 1100, BASE), { color: C.lineSoft, sw: 2, dash: '4 10' })
 
-    const growBars: SVGRectElement[] = []
+    const growBars: Array<{ node: SVGRectElement; up: boolean }> = []
     const barValues: SVGTextElement[] = []
     for (const bar of BARS) {
-      const h = (bar.value ?? 0) * UNIT
-      const value = bar.value === null ? (bar.label === '无 skills' ? '0' : '≈0') : `+${bar.value}`
-      text(chart, bar.cx, 814, bar.label, { size: 24, anchor: 'middle' })
+      // 正值画在零线上方，负值画在零线下方，零本身画一条细线
+      const h = Math.abs(bar.value) * UNIT
+      const up = bar.value > 0
+      const value = bar.value > 0 ? `+${bar.value}` : bar.value === 0 ? '0' : `−${Math.abs(bar.value)}`
+      text(chart, bar.cx, 842, bar.label, { size: 24, anchor: 'middle' })
       barValues.push(
-        text(chart, bar.cx, bar.value === null ? 744 : 780 - h - 28, value, {
-          size: bar.value === null ? 28 : 30,
+        text(chart, bar.cx, bar.value > 0 ? BASE - h - 26 : bar.value === 0 ? BASE - 26 : BASE + h + 26, value, {
+          size: 28,
           weight: 800,
-          fill: bar.value === null ? C.muted : bar.color,
+          fill: bar.value === 0 ? C.muted : bar.color,
           anchor: 'middle',
         }),
       )
-      if (bar.value === null) {
-        rect(chart, bar.cx - bar.w / 2, 774, bar.w, 6, { r: 3, fill: bar.color, stroke: 'none' })
+      if (bar.value === 0) {
+        rect(chart, bar.cx - bar.w / 2, BASE - 3, bar.w, 6, { r: 3, fill: bar.color, stroke: 'none' })
       } else {
-        const fill = rect(chart, bar.cx - bar.w / 2, 780 - h, bar.w, h, { r: 8, fill: bar.color, stroke: 'none' })
-        growBars.push(fill)
+        const node = up
+          ? rect(chart, bar.cx - bar.w / 2, BASE - h, bar.w, h, { r: 8, fill: bar.color, stroke: 'none' })
+          : rect(chart, bar.cx - bar.w / 2, BASE, bar.w, h, { r: 8, fill: bar.color, stroke: 'none' })
+        growBars.push({ node, up })
       }
     }
 
-    const chartDot = circle(chart, 430, 780, 6, { fill: C.accent })
+    const chartDot = circle(chart, 430, BASE, 6, { fill: C.accent })
     gsap.set(chartDot, { autoAlpha: 0 })
 
     // 第四步：Thariq 的踩坑记录
@@ -222,7 +228,10 @@ const scene: Scene = {
     gsap.set(principleCards, { autoAlpha: 0 })
     gsap.set(smartZh, { autoAlpha: 0 })
     gsap.set(chart, { autoAlpha: 0 })
-    gsap.set(growBars, { scaleY: 0, transformOrigin: '50% 100%' })
+    // 负值柱向下长，缩放原点在顶端
+    for (const bar of growBars) {
+      gsap.set(bar.node, { scaleY: 0, transformOrigin: bar.up ? '50% 100%' : '50% 0%' })
+    }
     gsap.set(barValues, { autoAlpha: 0 })
     gsap.set(thariq, { autoAlpha: 0 })
 
@@ -252,7 +261,11 @@ const scene: Scene = {
     step()
     fadeOut(tl, [quotation, conn, ...principleCards, smartZh], undefined, 0.3)
     fadeIn(tl, chart, '<0.15', 0.45)
-    tl.to(growBars, { scaleY: 1, duration: 0.6, stagger: 0.12, ease: EASE.out }, '<0.2')
+    tl.to(
+      growBars.map((bar) => bar.node),
+      { scaleY: 1, duration: 0.6, stagger: 0.12, ease: EASE.out },
+      '<0.2',
+    )
     fadeIn(tl, barValues, '<0.3', 0.35, 0.06)
     idle((loop) => {
       loop.fromTo(chartDot, { autoAlpha: 0, x: 0 }, { autoAlpha: 1, duration: 0.2 }, 0)

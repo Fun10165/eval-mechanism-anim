@@ -21,11 +21,29 @@ const LEAVES = [
   { x: 1780, y: 760, parent: 2 },
 ]
 
+/** 标题估算宽度：汉字按字号，拉丁字符按 0.55 倍字号。 */
+function titleWidth(s: string, size: number): number {
+  return [...s].reduce((w, ch) => w + (/[\x00-\x7F]/.test(ch) ? size * 0.55 : size), 0)
+}
+
+/** 标题一行放不下时，按最后一个中文逗号折成两行并缩小字号，避免压到右侧示意图。 */
+function layoutTitle(raw: string): { lines: string[]; size: number } {
+  if (titleWidth(raw, 88) <= 980) return { lines: [raw], size: 88 }
+  const cut = raw.lastIndexOf('，')
+  if (cut > 0) return { lines: [raw.slice(0, cut + 1), raw.slice(cut + 1)], size: 60 }
+  return { lines: [raw], size: 60 }
+}
+
 const scene: Scene = {
   id: 'cover',
   bare: true,
   build({ svg, tl, step, idle, title, kicker }) {
-    const heading = text(svg, 150, 450, title, { size: 88, weight: 800 })
+    const { lines, size } = layoutTitle(title)
+    const heading = text(svg, 150, lines.length > 1 ? 398 : 450, lines.join('\n'), {
+      size,
+      weight: 800,
+      lineHeight: 1.2,
+    })
     const sub = text(svg, 150, 550, kicker, { size: FS.h2, fill: C.muted })
     const rule = path(svg, 'M150,620 L560,620', { color: C.accent, sw: 4 })
 

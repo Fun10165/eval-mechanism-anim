@@ -340,10 +340,10 @@ const scene: Scene = {
     const deltaDots = DELTA.map((p) => circle(delta, xOf(p.x, 40), yOf(p.y, 10), 8, { fill: C.text }))
     text(delta, 440, 852, 'Δ 大的组合，另一项的增量不一定同比例大', { size: 24, fill: C.muted })
 
-    // 第四步：相关是模型之间的比较；因果需要同一个模型上的对照实验
+    // 第四步：相关是模型之间的比较；因果要看同一份 skill 改动前后的配对
     const causal = group(svg)
     text(causal, 440, 198, '相关不等于因果', { size: 32, weight: 800 })
-    text(causal, 440, 240, '19 组是模型之间的比较；要证明因果，需要同一个模型上的对照实验', {
+    text(causal, 440, 240, '19 组是模型之间的比较；因果要看同一份 skill 改动前后的配对', {
       size: 24,
       fill: C.muted,
     })
@@ -378,38 +378,30 @@ const scene: Scene = {
     text(causal, 470, 720, '强模型两项都高，', { size: 26, fill: C.muted })
     text(causal, 470, 754, '只能说明两项一起变化', { size: 26, fill: C.muted })
 
+    // 右：同一份 skill 改动前后的三级效应
     rect(causal, 1120, 300, 660, 500, { r: 20, fill: C.panel, stroke: C.lineSoft })
-    text(causal, 1150, 350, '因果 · 同一个模型', { size: 28, weight: 700, fill: C.accent })
-    rect(causal, 1360, 380, 180, 56, { r: 14, fill: C.panel2, stroke: C.accent, sw: 2 })
-    text(causal, 1450, 408, '同一个模型', { size: 24, weight: 700, anchor: 'middle' })
-    path(causal, line(1408, 436, 1344, 480), { color: C.accent, sw: 2, head: true })
-    path(causal, line(1492, 436, 1556, 480), { color: C.accent, sw: 2, head: true })
-    chip(causal, 1300, 505, 190, 46, '有 skill', {
-      color: C.muted,
-      fill: C.panel2,
-      textFill: C.text,
-      size: 24,
-      weight: 600,
-    })
-    chip(causal, 1600, 505, 190, 46, '无 skill', {
-      color: C.lineSoft,
-      fill: C.panel2,
-      textFill: C.muted,
-      size: 24,
-      weight: 600,
-    })
-    path(causal, line(1320, 528, 1404, 586), { color: C.accent, sw: 2, head: true })
-    path(causal, line(1580, 528, 1496, 586), { color: C.accent, sw: 2, head: true })
-    chip(causal, 1450, 610, 240, 48, '只改 skill', {
-      color: C.accent,
-      fill: C.panel2,
-      textFill: C.accent,
-      size: 24,
-      weight: 700,
-    })
-    text(causal, 1450, 706, '对照实验', { size: 26, weight: 700, anchor: 'middle' })
-    text(causal, 1450, 752, 'E2：秩相关 0.22，不显著', { size: 28, fill: C.accent, anchor: 'middle' })
-    const ring = circle(causal, 1450, 610, 62, { fill: 'none', stroke: C.accent, sw: 2 })
+    text(causal, 1150, 350, '因果 · 同一份 skill 改动前后', { size: 28, weight: 700, fill: C.accent })
+    const causalRows = [
+      { y: 386, label: '加一条规则：点名某个命令', color: C.text },
+      { y: 476, label: '照做的比例 +41 个百分点', color: C.accent },
+      { y: 566, label: '最终正确率 +10 个百分点', color: C.pass },
+    ]
+    for (const row of causalRows) {
+      rect(causal, 1160, row.y, 580, 56, { r: 16, fill: C.panel2, stroke: C.lineSoft })
+      text(causal, 1450, row.y + 28, row.label, {
+        size: 26,
+        weight: 700,
+        fill: row.color,
+        anchor: 'middle',
+      })
+    }
+    path(causal, line(1450, 442, 1450, 476), { color: C.muted, sw: 2, head: true })
+    path(causal, line(1450, 532, 1450, 566), { color: C.muted, sw: 2, head: true })
+    text(causal, 1150, 664, '遵守率 0.25 → 0.66，16 个模型平均', { size: 24, fill: C.muted })
+    text(causal, 1150, 700, '口径：字符串检查，复述 token 也算遵守', { size: 24, fill: C.muted })
+    text(causal, 1150, 736, '3,159 份 skill、2,608 对修订、4 个 agent', { size: 24, fill: C.muted })
+    text(causal, 1750, 776, 'arXiv 2610.04832', { size: 22, fill: C.dim, anchor: 'end' })
+    const ring = rect(causal, 1162, 478, 576, 52, { r: 14, fill: 'none', stroke: C.accent, sw: 2 })
     gsap.set(ring, { opacity: 0 })
 
     // 第五步：两个长指令基准
